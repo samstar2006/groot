@@ -53,7 +53,7 @@ jobs:
           KEYCHAIN_PATH: $RUNNER_TEMP/app-signing.keychain-db
           KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
         run: |
-          xcodebuild -project iamgroot/I am Groot.xcodeproj -scheme "I am Groot" \
+          xcodebuild -project "iamgroot/I am Groot.xcodeproj" -scheme "I am Groot" \
           -archivePath $RUNNER_TEMP/iamgroot.xcarchive \
           -sdk iphoneos \
           -configuration Debug \
