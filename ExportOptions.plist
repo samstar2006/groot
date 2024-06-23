@@ -13,6 +13,10 @@
     </dict>
     <key>signingStyle</key>
     <string>manual</string>
+    <key>compileBitcode</key>
+    <true/>
+    <key>thinning</key>
+    <string>&lt;none&gt;</string>
   </dict>
 </plist>
 
