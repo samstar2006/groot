@@ -16,6 +16,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: List repository contents
+        run: |
+          echo "Listing repository contents to verify path"
+          ls -R
+
       - name: Configure Git for Authentication
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
