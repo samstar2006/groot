@@ -13,13 +13,46 @@
 # Uncomment the line if you want fastlane to automatically update itself
 # update_fastlane
 
-default_platform(:ios)
+# default_platform(:ios)
+
+# platform :ios do
+#   desc "Push a new beta build to TestFlight"
+#   lane :beta do
+#     increment_build_number(xcodeproj: "I am Groot.xcodeproj")
+#     build_app(scheme: "I am Groot")
+#     upload_to_testflight
+#   end
+# end
+
+
 
 platform :ios do
-  desc "Push a new beta build to TestFlight"
-  lane :beta do
-    increment_build_number(xcodeproj: "I am Groot.xcodeproj")
-    build_app(scheme: "I am Groot")
-    upload_to_testflight
+  desc "Automatic update the version number and create release branch"
+  lane :update_version do
+      # Show option update type
+      update_type = UI.select("Select update type: ", ["major", "minor", "patch"])
+
+      # Checkout to the master branch
+      sh("git checkout master")
+      
+      # Pull the master branch to make sure always updated
+      sh("git pull origin master")
+           
+      # Increment the version number by update_type
+      new_version = increment_version_number(bump_type: update_type)
+
+      # Create a new release branch and checkout
+      sh("git checkout -b release/#{new_version}")
+      
+      # Add changes
+      sh("git add --all")
+      
+      # Commit changes
+      sh("git commit -m 'Update the app version to #{new_version}'")
+      
+      # Push release branch to origin
+      sh("git push origin release/#{new_version}")
+      
+      UI.success("Successfully updated app version to #{new_version}")
   end
 end
