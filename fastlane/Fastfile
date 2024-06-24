@@ -71,7 +71,7 @@ platform :ios do
     api_key = app_store_connect_api_key(
       key_id: ENV['APP_STORE_CONNECT_API_KEY_ID'],
       issuer_id: ENV['APP_STORE_CONNECT_API_KEY_ISSUER_ID'],
-      key_filepath: "./fastlane/AuthKey_7JB438T2RU.p8" # Updated to use key_filepath
+      key_content: ENV['APP_STORE_CONNECT_API_KEY']
     )
 
     build_app(
