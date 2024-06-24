@@ -47,6 +47,12 @@ jobs:
           echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
           echo -n "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode -o $PP_PATH
 
+          # Verify the contents of the decoded files
+          echo "Contents of the provisioning profile file:"
+          cat $PP_PATH
+          echo "Contents of the certificate file:"
+          cat $CERTIFICATE_PATH
+
           # Create temporary keychain
           security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
           security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
@@ -67,7 +73,15 @@ jobs:
           echo "Listing installed provisioning profiles:"
           ls -l ~/Library/MobileDevice/Provisioning\ Profiles/
           echo "Provisioning profile details:"
-          security cms -D -i ~/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision
+          security cms -D -i ~/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision || cat ~/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision
+
+      - name: Print environment variables
+        run: |
+          echo "Development team: $DEVELOPMENT_TEAM"
+          echo "Provisioning profile specifier: $PROVISIONING_PROFILE_SPECIFIER"
+        env:
+          DEVELOPMENT_TEAM: ${{ secrets.DEVELOPMENT_TEAM_ID }}
+          PROVISIONING_PROFILE_SPECIFIER: ${{ secrets.PROVISIONING_PROFILE_SPECIFIER }}
 
       - name: Build and sign iOS app using xcodebuild
         env:
