@@ -8,10 +8,10 @@ platform :ios do
       key_content: ENV['APP_STORE_CONNECT_API_KEY']
     )
 
-    build_app(
-      project: "I am Groot.xcodeproj", # Use this for .xcodeproj
-      scheme: "I am Groot"
-    )
+    # build_app(
+    #   project: "I am Groot.xcodeproj", # Use this for .xcodeproj
+    #   scheme: "I am Groot"
+    # )
 
     upload_to_testflight(
       ipa: options[:ipa],

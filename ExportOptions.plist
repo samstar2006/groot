@@ -8,15 +8,11 @@
     <string>J9PVVZHDF5</string>
     <key>provisioningProfiles</key>
     <dict>
-      <key>com.kehinde.i-am-groot</key>
-      <string>I-am-groot-profile</string>
+      <key>com.iam.groot</key>
+      <string>iamgrootprofile</string>
     </dict>
     <key>signingStyle</key>
     <string>manual</string>
-    <key>compileBitcode</key>
-    <true/>
-    <key>thinning</key>
-    <string>&lt;none&gt;</string>
   </dict>
 </plist>
 
