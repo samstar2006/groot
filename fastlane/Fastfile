@@ -2,14 +2,16 @@
 platform :ios do
   desc "Upload IPA to TestFlight"
   lane :upload_ipa_to_testflight do |options|
+    # Generate an App Store Connect API key for authentication
     api_key = app_store_connect_api_key(
-      key_id: ENV['APP_STORE_CONNECT_API_KEY_ID'],
-      issuer_id: ENV['APP_STORE_CONNECT_API_KEY_ISSUER_ID'],
-      key_content: ENV['APP_STORE_CONNECT_API_KEY']
+      key_id: ENV['APP_STORE_CONNECT_API_KEY_ID'],               # Your API key ID
+      issuer_id: ENV['APP_STORE_CONNECT_API_KEY_ISSUER_ID'],     # Your API key issuer ID
+      key_content: ENV['APP_STORE_CONNECT_API_KEY']              # Your API key content
     )
 
     increment_version_number(
       bump_type: "patch" # This will increment the version number (e.g., from 1.0 to 1.0.1)
+      xcodeproj: "I am Groot.xcodeproj" # Update this if you're using an Xcode project
     )
 
     increment_build_number(

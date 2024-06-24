@@ -12,14 +12,15 @@ jobs:
   build_with_signing:
     runs-on: macos-latest
     steps:
-      # this was more debug as was curious what came pre-installed
-      # GitHub shares this online, e.g. https://github.com/actions/runner-images/blob/macOS-12/20230224.1/images/macos/macos-12-Readme.md
-      - name: check Xcode version
+      # Check the Xcode version installed on the runner
+      - name: Check Xcode version
         run: /usr/bin/xcodebuild -version
 
-      - name: checkout repository
+      # Checkout the repository to the GitHub runner
+      - name: Checkout repository
         uses: actions/checkout@v3
 
+      # Install the Apple certificate and provisioning profile
       - name: Install the Apple certificate and provisioning profile
         env:
           BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
@@ -27,29 +28,30 @@ jobs:
           BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.BUILD_PROVISION_PROFILE_BASE64 }}
           KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
         run: |
-          # create variables
+          # Create variables for paths
           CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
           PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
           KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
 
-          # import certificate and provisioning profile from secrets
+          # Import certificate and provisioning profile from secrets
           echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
           echo -n "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode -o $PP_PATH
 
-          # create temporary keychain
+          # Create and configure a temporary keychain
           security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
           security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
 
-          # import certificate to keychain
+          # Import the certificate into the keychain
           security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
           security list-keychain -d user -s $KEYCHAIN_PATH
 
-          # apply provisioning profile
+          # Copy the provisioning profile to the appropriate directory
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
           cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles          
 
-      - name: build archive
+      # Build and archive the iOS app using xcodebuild
+      - name: Build archive
         run: |
           xcodebuild -scheme "I am Groot" \
           -archivePath $RUNNER_TEMP/iamgroot.xcarchive \
@@ -58,7 +60,8 @@ jobs:
           -destination generic/platform=iOS \
           clean archive          
 
-      - name: export ipa
+      # Export the archive to an IPA file
+      - name: Export IPA
         env:
           EXPORT_OPTIONS_PLIST: ${{ secrets.EXPORT_OPTIONS_PLIST_BASE64 }}
         run: |
@@ -66,6 +69,7 @@ jobs:
           echo -n "$EXPORT_OPTIONS_PLIST" | base64 --decode -o $EXPORT_OPTS_PATH
           xcodebuild -exportArchive -archivePath $RUNNER_TEMP/iamgroot.xcarchive -exportOptionsPlist $EXPORT_OPTS_PATH -exportPath $RUNNER_TEMP/build          
 
+      # Upload the built IPA file to S3 for distribution
       - name: Upload the built IPA file to S3
         run: |
           TIMESTAMP=$(date +"%Y%m%d%H%M%S")
@@ -74,4 +78,3 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
-
