@@ -1,0 +1,47 @@
+name: "Deploy iOS app"
+
+on:
+  workflow_run:
+    workflows: ["Build iOS app"]
+    types:
+      - completed
+
+jobs:
+  deploy:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install Ruby and Fastlane
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.0'
+
+      - name: Install Fastlane dependencies
+        run: |
+          gem install bundler
+          bundle install
+
+      - name: List and download the latest IPA from S3
+        run: |
+          LATEST_IPA=$(aws s3api list-objects-v2 --bucket ${{ secrets.AWS_S3_BUCKET }} --prefix ipa/ --query 'sort_by(Contents, &LastModified)[-1].Key' --output text)
+          echo "Latest IPA: $LATEST_IPA"
+          aws s3 cp s3://${{ secrets.AWS_S3_BUCKET }}/${LATEST_IPA} $RUNNER_TEMP/latest-iamgroot.ipa
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+
+      - name: Upload IPA to TestFlight using Fastlane
+        env:
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY }}
+        run: |
+          echo $APP_STORE_CONNECT_API_KEY > fastlane/AuthKey.p8
+          bundle exec fastlane ios upload_ipa_to_testflight ipa:$RUNNER_TEMP/latest-iamgroot.ipa
+
+      - name: Complete job
+        run: echo "Job complete"
