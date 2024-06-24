@@ -60,13 +60,20 @@ jobs:
           # Apply provisioning profile
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
           cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles/
-          echo "Installed provisioning profile at: $PP_PATH"
+          echo "Provisioning profile installed at: $PP_PATH"
+
+      - name: Verify provisioning profile installation
+        run: |
+          echo "Listing installed provisioning profiles:"
+          ls -l ~/Library/MobileDevice/Provisioning\ Profiles/
+          echo "Provisioning profile details:"
+          security cms -D -i ~/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision
 
       - name: Build and sign iOS app using xcodebuild
         env:
           KEYCHAIN_PATH: $RUNNER_TEMP/app-signing.keychain-db
           KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
-          DEVELOPMENT_TEAM:  ${{ secrets.DEVELOPMENT_TEAM_ID }}
+          DEVELOPMENT_TEAM: ${{ secrets.DEVELOPMENT_TEAM_ID }}
           PROVISIONING_PROFILE_SPECIFIER: ${{ secrets.PROVISIONING_PROFILE_SPECIFIER }}
         run: |
           xcodebuild -project "I am Groot.xcodeproj" -scheme "I am Groot" \
