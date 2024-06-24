@@ -60,11 +60,14 @@ jobs:
           # Apply provisioning profile
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
           cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles/
+          echo "Installed provisioning profile at: $PP_PATH"
 
       - name: Build and sign iOS app using xcodebuild
         env:
           KEYCHAIN_PATH: $RUNNER_TEMP/app-signing.keychain-db
           KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+          DEVELOPMENT_TEAM:  ${{ secrets.DEVELOPMENT_TEAM_ID }}
+          PROVISIONING_PROFILE_SPECIFIER: ${{ secrets.PROVISIONING_PROFILE_SPECIFIER }}
         run: |
           xcodebuild -project "I am Groot.xcodeproj" -scheme "I am Groot" \
             -archivePath $RUNNER_TEMP/iamgroot.xcarchive \
@@ -73,8 +76,8 @@ jobs:
             clean archive \
             CODE_SIGN_STYLE=Manual \
             CODE_SIGN_IDENTITY="iPhone Distribution" \
-            PROVISIONING_PROFILE_SPECIFIER=${{ secrets.PROVISIONING_PROFILE_SPECIFIER }} \
-            DEVELOPMENT_TEAM=${{ secrets.DEVELOPMENT_TEAM_ID }} \
+            PROVISIONING_PROFILE_SPECIFIER=${PROVISIONING_PROFILE_SPECIFIER} \
+            DEVELOPMENT_TEAM=${DEVELOPMENT_TEAM} \
             OTHER_CODE_SIGN_FLAGS="--keychain $KEYCHAIN_PATH"
 
       - name: Export the archive
