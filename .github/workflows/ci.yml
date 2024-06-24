@@ -77,19 +77,22 @@ jobs:
 
       - name: Print environment variables
         run: |
-          echo "Development team: $DEVELOPMENT_TEAM"
+          echo "Development team: $DEVELOPMENT_TEAM_ID"
           echo "Provisioning profile specifier: $PROVISIONING_PROFILE_SPECIFIER"
         env:
-          DEVELOPMENT_TEAM: ${{ secrets.DEVELOPMENT_TEAM_ID }}
+          DEVELOPMENT_TEAM_ID: ${{ secrets.DEVELOPMENT_TEAM_ID }}
           PROVISIONING_PROFILE_SPECIFIER: ${{ secrets.PROVISIONING_PROFILE_SPECIFIER }}
 
       - name: Build and sign iOS app using xcodebuild
         env:
           KEYCHAIN_PATH: $RUNNER_TEMP/app-signing.keychain-db
           KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
-          DEVELOPMENT_TEAM: ${{ secrets.DEVELOPMENT_TEAM_ID }}
+          DEVELOPMENT_TEAM_ID: ${{ secrets.DEVELOPMENT_TEAM_ID }}
           PROVISIONING_PROFILE_SPECIFIER: ${{ secrets.PROVISIONING_PROFILE_SPECIFIER }}
         run: |
+          echo "Using development team: ${DEVELOPMENT_TEAM_ID}"
+          echo "Using provisioning profile specifier: ${PROVISIONING_PROFILE_SPECIFIER}"
+          echo "Keychain path: ${KEYCHAIN_PATH}"
           xcodebuild -project "I am Groot.xcodeproj" -scheme "I am Groot" \
             -archivePath $RUNNER_TEMP/iamgroot.xcarchive \
             -sdk iphoneos \
@@ -98,7 +101,7 @@ jobs:
             CODE_SIGN_STYLE=Manual \
             CODE_SIGN_IDENTITY="iPhone Distribution" \
             PROVISIONING_PROFILE_SPECIFIER=${PROVISIONING_PROFILE_SPECIFIER} \
-            DEVELOPMENT_TEAM=${DEVELOPMENT_TEAM} \
+            DEVELOPMENT_TEAM_ID=${DEVELOPMENT_TEAM_ID} \
             OTHER_CODE_SIGN_FLAGS="--keychain $KEYCHAIN_PATH"
 
       - name: Export the archive
@@ -117,3 +120,4 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
+
