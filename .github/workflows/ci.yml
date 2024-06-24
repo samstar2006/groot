@@ -69,8 +69,9 @@ jobs:
       - name: Upload the built IPA file to S3
         run: |
           TIMESTAMP=$(date +"%Y%m%d%H%M%S")
-          aws s3 cp "$RUNNER_TEMP/build/I am Groot.ipa" "s3://${{ secrets.AWS_S3_BUCKET }}/ipa/iamgroot-${TIMESTAMP}.ipa"
-          env:
+            aws s3 cp "$RUNNER_TEMP/build/Pizza Man.ipa" "s3://${{ secrets.AWS_S3_BUCKET }}/ipa/pizza-man-${TIMESTAMP}.ipa"
+        env:
             AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
             AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            AWS_REGION: ${{ secrets.AWS_REGION }}
 
